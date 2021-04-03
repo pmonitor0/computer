@@ -1,3 +1,6 @@
+//A következő link alapján
+////http://velisthoughts.blogspot.com/2012/02/enumerating-and-using-partitions-and.html
+
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -382,6 +385,9 @@ namespace DiskProp
         {
             IntPtr vol = FindFirstVolume(volName, 261);
             bool success = vol != (IntPtr)(-1);
+            Type ts = typeof(VOLUME_DISK_EXTENTS);
+            int ss = Marshal.SizeOf(ts);
+            IntPtr mptr = Marshal.AllocHGlobal(ss);
             while (success)
             {
                 volName.Remove(volName.ToString().Length - 1, 1);
@@ -389,9 +395,6 @@ namespace DiskProp
                 volName.Append("\\");
                 if ((int)volH != -1)
                 {
-                    Type ts = typeof(VOLUME_DISK_EXTENTS);
-                    int ss = Marshal.SizeOf(ts);
-                    IntPtr mptr = Marshal.AllocHGlobal(ss);
                     uint ior;
                     if (DeviceIoControl(volH, IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS, IntPtr.Zero, 0, mptr, (uint)ss, out ior, IntPtr.Zero))
                     {
@@ -407,11 +410,11 @@ namespace DiskProp
                             }
                         }
                     }
-                    Marshal.FreeHGlobal(mptr);
                     CloseHandle(volH);
                 }
                 success = FindNextVolume(vol, volName, (uint)261);
             }
+            Marshal.FreeHGlobal(mptr);
             FindVolumeClose(vol);
             return false;
         }
